@@ -20,11 +20,22 @@
  *
  *  BSD license, all text above must be included in any redistribution
  */
+#pragma once
+
 #ifndef _ADAFRUIT_PWMServoDriver_H
 #define _ADAFRUIT_PWMServoDriver_H
 
 #include <Arduino.h>
-#include <Wire.h>
+
+// modified to enable using software I2C instead of hardware I2C 
+// 2022-06-03 Technik Gegg (technik.gegg@gmail.com)
+#if defined(USE_PCA9685_SW_I2C)
+  #include <SoftWire.h>
+  #define I2CBusBase  SoftWire
+#else
+  #include <Wire.h>
+  #define I2CBusBase  TwoWire
+#endif
 
 // REGISTER ADDRESSES
 #define PCA9685_MODE1 0x00      /**< Mode Register 1 */
@@ -74,9 +85,11 @@
  */
 class Adafruit_PWMServoDriver {
 public:
-  Adafruit_PWMServoDriver();
-  Adafruit_PWMServoDriver(const uint8_t addr);
-  Adafruit_PWMServoDriver(const uint8_t addr, TwoWire &i2c);
+  #if !defined(USE_PCA9685_SW_I2C)
+    Adafruit_PWMServoDriver();
+    Adafruit_PWMServoDriver(const uint8_t addr);
+  #endif
+  Adafruit_PWMServoDriver(const uint8_t addr, I2CBusBase &i2c);
   void begin(uint8_t prescale = 0);
   void reset();
   void sleep();
@@ -95,7 +108,7 @@ public:
 
 private:
   uint8_t _i2caddr;
-  TwoWire *_i2c;
+  I2CBusBase *_i2c;
 
   uint32_t _oscillator_freq;
   uint8_t read8(uint8_t addr);

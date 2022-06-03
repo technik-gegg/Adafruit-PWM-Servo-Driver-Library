@@ -6,3 +6,13 @@ Doxyfile*
 doxygen_sqlite3.db
 html
 *.tmp
+
+# platformio
+.pio
+.pioenvs
+.piolibdeps
+.lib
+
+# vscode
+*.workspace
+.vscode

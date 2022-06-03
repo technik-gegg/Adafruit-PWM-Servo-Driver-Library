@@ -32,6 +32,8 @@
 
 //#define ENABLE_DEBUG_OUTPUT
 
+#if !defined(USE_PCA9685_SW_I2C)
+
 /*!
  *  @brief  Instantiates a new PCA9685 PWM driver chip with the I2C address on a
  * TwoWire interface
@@ -46,16 +48,17 @@ Adafruit_PWMServoDriver::Adafruit_PWMServoDriver()
  */
 Adafruit_PWMServoDriver::Adafruit_PWMServoDriver(const uint8_t addr)
     : _i2caddr(addr), _i2c(&Wire) {}
+#endif
 
 /*!
  *  @brief  Instantiates a new PCA9685 PWM driver chip with the I2C address on a
  * TwoWire interface
  *  @param  addr The 7-bit I2C address to locate this chip, default is 0x40
- *  @param  i2c  A reference to a 'TwoWire' object that we'll use to communicate
+ *  @param  i2c  A reference to a 'I2CBusBase' object that we'll use to communicate
  *  with
  */
 Adafruit_PWMServoDriver::Adafruit_PWMServoDriver(const uint8_t addr,
-                                                 TwoWire &i2c)
+                                                 I2CBusBase &i2c)
     : _i2caddr(addr), _i2c(&i2c) {}
 
 /*!
@@ -209,7 +212,11 @@ uint8_t Adafruit_PWMServoDriver::readPrescale(void) {
  *  @return requested PWM output value
  */
 uint8_t Adafruit_PWMServoDriver::getPWM(uint8_t num) {
-  _i2c->requestFrom((int)_i2caddr, PCA9685_LED0_ON_L + 4 * num, (int)4);
+  #if defined(USE_PCA9685_SW_I2C)
+    _i2c->requestFrom((int)_i2caddr, PCA9685_LED0_ON_L + 4 * num);
+  #else
+    _i2c->requestFrom((int)_i2caddr, PCA9685_LED0_ON_L + 4 * num, (int)4);
+  #endif
   return _i2c->read();
 }
 
